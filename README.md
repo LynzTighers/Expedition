@@ -3,6 +3,11 @@
 A co-op expansion for **Outward Definitive Edition** (BepInEx 5, C#): bigger parties
 (4 players to start), better co-op sync, and waymarks (pings) your party can see.
 
+### ⬇️ [Download the latest version](https://github.com/LynzTighers/Expedition/releases/latest)
+
+Open the link, scroll to **Assets**, and download `Expedition-x.y.z.zip`
+(not "Source code"). Then follow [Install](#install) below.
+
 > **Status: alpha, not yet tested with 3+ players.** Expect bugs when more than 2 people
 > play together. Please report what happens (see [Reporting problems](#reporting-problems)).
 
@@ -45,7 +50,8 @@ BepInEx mods only work on this version.
 
 ### 3. Install Expedition
 
-1. Download the latest `Expedition-x.y.z.zip` from **Releases**.
+1. Download the latest `Expedition-x.y.z.zip` from the
+   [latest release](https://github.com/LynzTighers/Expedition/releases/latest), under **Assets**.
 2. Copy **both** DLLs into `Outward_Defed\BepInEx\plugins\`:
    - `Expedition.Plugin.dll`
    - `Expedition.Core.dll`
