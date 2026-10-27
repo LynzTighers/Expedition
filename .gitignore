@@ -1,0 +1,14 @@
+# Build output
+bin/
+obj/
+
+# IDE files
+.vs/
+*.user
+*.suo
+
+# Release ZIPs are uploaded to GitHub Releases, not committed
+*.zip
+
+# Game DLLs must never be committed (they belong to the game's publisher)
+Assembly-CSharp*.dll

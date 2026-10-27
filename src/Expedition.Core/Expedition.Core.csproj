@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- netstandard2.0 loads in both Unity 2020.3 Mono (the game) and .NET 8 (the tests). -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <RootNamespace>Expedition.Core</RootNamespace>
+    <!-- Deliberately no references to UnityEngine, BepInEx, HarmonyLib or Photon. -->
+  </PropertyGroup>
+
+</Project>

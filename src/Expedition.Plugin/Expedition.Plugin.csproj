@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Matches the Outward Mod Template; runs on Outward DE's Unity 2020.3 Mono runtime. -->
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <RootNamespace>Expedition.Plugin</RootNamespace>
+    <!-- Required with publicized game libs: lets Mono skip access checks on originally-private members. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Don't copy game/Unity/BepInEx DLLs into the output; Expedition.Core.dll is still copied. -->
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Keep BepInEx.BaseLib at or below the BepInEx version in your BepInExPack_Outward install. -->
+    <PackageReference Include="BepInEx.BaseLib" Version="5.4.16" />
+    <PackageReference Include="UnityEngine.Modules" Version="2020.3.26" />
+    <!-- Prerelease version; must be written exactly. Lives on the BepInEx feed, not nuget.org. -->
+    <PackageReference Include="Outward.GameLibs" Version="2022.5.18-r.0" />
+    <PackageReference Include="HarmonyX" Version="2.5.7" />
+    <!-- This machine has no .NET Framework 4.7.2 targeting pack; this supplies the reference assemblies at build time. -->
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Expedition.Core\Expedition.Core.csproj" />
+  </ItemGroup>
+
+</Project>
