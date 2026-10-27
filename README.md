@@ -109,6 +109,9 @@ The DLLs land in `src/Expedition.Plugin/bin/Debug/net472/`.
 
 Inspired by [Raid Mode](https://www.nexusmods.com/outward/mods/183) by SpicerXD.
 
+Developed with the help of AI coding tools (Claude Code), used for research,
+explanations and code review while I learned C# and Outward modding.
+
 ## License
 
 [MIT](LICENSE)
