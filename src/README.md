@@ -5,20 +5,20 @@ the first time; after that, jump to the section you need.
 
 ```
 src/
-  Expedition.Core/              pure C# rules, no Unity or game code (tested without the game)
+  Expedition.Core/           pure C# rules, no Unity or game code (tested without the game)
     Domain/
       Position.cs            an X, Y, Z point
       PingUpdate.cs          one "player N pinged here" message
-      PingBoard.cs           keeps the newest ping per player (Exercise 01)
-  Expedition.Plugin/            the BepInEx mod that runs inside Outward
-    Plugin.cs                the entry point: loads the mod, turns on patches, shows the welcome message
+      PingBoard.cs           keeps the newest ping per player (in progress)
+  Expedition.Plugin/         the BepInEx mod that runs inside Outward
+    Plugin.cs                the entry point: loads the mod and turns on patches
     Patches/
       PhotonRoomPatches.cs   raises the online player limit from 2 to 4
 ```
 
 Why two projects? Code in `Expedition.Core` can be tested in a second with
 `dotnet test`, without starting Outward. `Expedition.Plugin` stays thin: it connects
-the game to Core. See `docs/ARCHITECTURE.md` for the longer version.
+the game to Core.
 
 ---
 
@@ -32,16 +32,6 @@ attribute. That class is `Plugin`.
 | `[BepInPlugin("com.lynztighers.expedition", "Expedition", "0.1.0")]` | The mod's unique ID, name and version. |
 | `Awake()` | Unity calls this once when the mod loads. It writes to the log and turns on Harmony patches. |
 | `new Harmony("com.lynztighers.expedition").PatchAll()` | Finds every class marked `[HarmonyPatch]` in this mod and applies it. |
-| `Update()` | Unity calls this every frame. It shows the welcome message once you're in the world. |
-
-### The welcome message, step by step
-
-1. Wait until `NetworkLevelLoader.Instance.IsOverallLoadingDone` is `true` (loading has finished).
-2. Get the host's character: `CharacterManager.Instance.GetWorldHostCharacter()`.
-3. Start a 3-second timer (`showAt = Time.time + 3f`). Showing the message straight away
-   didn't work: the screen was still fading in and the popup vanished.
-4. When the timer runs out, call `CharacterUI.ShowInfoNotification(...)` and set
-   `hasDisplayed = true` so it only shows once per game launch.
 
 ---
 

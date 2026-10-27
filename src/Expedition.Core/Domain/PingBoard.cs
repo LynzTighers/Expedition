@@ -12,7 +12,7 @@ namespace Expedition.Core.Domain
         // Active pings, one per player.
         private readonly Dictionary<int, PingUpdate> _active = new Dictionary<int, PingUpdate>();
 
-        // EXERCISE 01: you'll likely need another field here. See docs/exercises/01-sequence-ordering.md.
+        // EXERCISE 01: you'll likely need another field here.
 
         public int Count => _active.Count;
 

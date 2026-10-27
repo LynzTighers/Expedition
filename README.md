@@ -11,7 +11,6 @@ A co-op expansion for **Outward Definitive Edition** (BepInEx 5, C#): bigger par
 | Feature | Status |
 |---|---|
 | Online rooms hold **4 players** instead of 2 | Works in the log; not yet tested with 4 real players |
-| Welcome message a few seconds after you load in | Works (host only) |
 | Waymarks (pings) | In development |
 
 Known risks for players 3 and 4: getting stuck on a loading screen, missing items or quest
@@ -89,10 +88,7 @@ Open an issue, or message the author, with:
 
 ## For developers
 
-- [How the source code works](src/README.md)
-- [Project plan and tools](docs/PROJECT_PLAN.md)
-- [Architecture: testing multiplayer without the game](docs/ARCHITECTURE.md)
-- [Exercise 01: Sequence ordering](docs/exercises/01-sequence-ordering.md)
+See [How the source code works](src/README.md).
 
 ```
 src/Expedition.Core/          pure C# logic, no Unity (netstandard2.0)
