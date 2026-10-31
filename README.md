@@ -8,19 +8,29 @@ A co-op expansion for **Outward Definitive Edition** (BepInEx 5, C#): bigger par
 Open the link, scroll to **Assets**, and download `Expedition-x.y.z.zip`
 (not "Source code"). Then follow [Install](#install) below.
 
-> **Status: alpha, not yet tested with 3+ players.** Expect bugs when more than 2 people
-> play together. Please report what happens (see [Reporting problems](#reporting-problems)).
+> **Status: alpha. Tested with 3 players; not yet with 4.** Expect some bugs when more than
+> 2 people play together. Please report what happens (see [Reporting problems](#reporting-problems)).
 
 ## What it does right now
 
 | Feature | Status |
 |---|---|
-| Online rooms hold **4 players** instead of 2 | Works in the log; not yet tested with 4 real players |
+| Online rooms hold **4 players** instead of 2 | ✅ Works: tested with 3 players. Not yet tested with 4. |
 | Waymarks (pings) | In development |
 
-Known risks for players 3 and 4: getting stuck on a loading screen, missing items or quest
-progress from other players, and compass markers not showing. Normal single-player and
-2-player co-op should play as usual.
+### 3-player test results
+
+| What | Result |
+|---|---|
+| Third player joins (no stuck loading screen) | ✅ Works |
+| Everyone sees each other move and fight | ✅ Works |
+| Dropped items show up for everyone | ✅ Works |
+| Going down and being revived | ✅ Works |
+| No errors in the log | ✅ Works |
+| Compass markers | ⚠️ Bug: the last player to join sees everyone, but the first two players don't see the third on their compass |
+| Quest progress for every player | ❔ Not tested yet |
+
+Normal single-player and 2-player co-op play as usual.
 
 ---
 
@@ -38,14 +48,28 @@ BepInEx mods only work on this version.
 
 ### 2. Install BepInEx
 
-1. Download **BepInExPack_Outward** from Thunderstore.
-2. Find your game folder: in Steam, right-click **Outward** → **Manage** → **Browse local files**.
-3. Open the **`Outward_Defed`** folder. It contains `Outward Definitive Edition.exe`.
-4. Unzip the BepInEx pack **into `Outward_Defed`**, so `winhttp.dll` and the `BepInEx` folder
-   sit next to `Outward Definitive Edition.exe`.
+1. Download **BepInExPack_Outward** from
+   [Thunderstore](https://thunderstore.io/c/outward/p/BepInEx/BepInExPack_Outward/)
+   (click **Download** on the right).
+2. Unzip it **somewhere else first**, such as your Downloads folder. Not into the game folder.
+3. Find your game folder: in Steam, right-click **Outward** → **Manage** → **Browse local files**.
+   Open the **`Outward_Defed`** folder. It contains `Outward Definitive Edition.exe`.
+4. Open the unzipped **`BepInExPack_Outward`** folder and move **what's inside it** into
+   `Outward_Defed`: the `BepInEx` folder, `winhttp.dll` and `doorstop_config.ini`.
+   Don't move the `BepInExPack_Outward` folder itself.
 
-   ⚠️ Not the outer `Outward` folder with the classic `Outward.exe`. If BepInEx is there,
-   it won't load in the Definitive Edition.
+   When you're done it should look like this:
+
+   ```
+   Outward_Defed\
+     Outward Definitive Edition.exe
+     winhttp.dll
+     doorstop_config.ini
+     BepInEx\
+   ```
+
+   ⚠️ Use `Outward_Defed`, not the outer `Outward` folder with the classic `Outward.exe`.
+   If BepInEx is there, it won't load in the Definitive Edition.
 5. Start the game once, then close it. This creates `Outward_Defed\BepInEx\plugins`.
 
 ### 3. Install Expedition
