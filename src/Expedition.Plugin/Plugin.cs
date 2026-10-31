@@ -19,6 +19,9 @@ namespace Expedition.Plugin
             // Applies every [HarmonyPatch] class in this mod (see the Patches folder).
             new Harmony("com.lynztighers.expedition").PatchAll();
             Logger.LogInfo("Room limit raised to " + Patches.RoomLimit.MaxPlayers + " players.");
+
+            Pings.Create();
+            Logger.LogInfo("Pings: " + Settings.Pings.Value + " (key: " + Settings.PingKey.Value + ")");
             Logger.LogInfo("Nameplates: " + Settings.Nameplates.Value
                 + ", shared quest rewards: " + Settings.ShareQuestRewards.Value
                 + ", shared silver: " + Settings.ShareSilver.Value

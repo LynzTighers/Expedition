@@ -17,7 +17,7 @@ A co-op expansion for **Outward Definitive Edition** (BepInEx 5, C#): bigger par
 | **Shared quest rewards:** every player gets the quest's items, skills, silver and XP | 🆕 0.2.0, not yet tested in-game |
 | **Shared silver:** silver looted from chests, enemies or the ground is split evenly | 🆕 0.2.0, not yet tested in-game |
 | **Shared loot:** take an item from a chest or enemy and everyone else gets their own copy | 🆕 0.2.0, not yet tested in-game |
-| Waymarks (pings) | In development |
+| **Pings:** press the **middle mouse button** to mark the spot in front of you. Everyone sees `Name · 24 m ▼` there for 20 seconds | 🆕 0.2.0, not yet tested in-game |
 
 Each feature can be turned off: see [Settings](#settings).
 
@@ -132,6 +132,7 @@ same things.
 [Info   :   BepInEx] Loading [Expedition 0.2.0]
 [Info   :Expedition] THis mod has loaded!
 [Info   :Expedition] Room limit raised to 4 players.
+[Info   :Expedition] Pings: True (key: Mouse2)
 [Info   :Expedition] Nameplates: True, shared quest rewards: True, shared silver: True, shared loot: True
 ```
 
@@ -156,6 +157,13 @@ same things.
 The game's menus still show 2 players. That's expected: the limit is raised behind the
 scenes, and the menus haven't been updated yet.
 
+### Pinging
+
+Aim at something and click the **middle mouse button** (the scroll wheel). Everyone in the
+group sees a yellow marker with your name and how far away it is, and gets a
+"*Name* pinged a spot" message. A new ping replaces your old one. Pings disappear after
+20 seconds. You can change the key and the time in [Settings](#settings).
+
 ### How sharing works
 
 | What | How it's shared | Notes |
@@ -173,12 +181,17 @@ change `true` to `false` for anything you want off, then restart the game:
 ```ini
 [Party]
 Nameplates = true
+Pings = true
+PingKey = Mouse2
+PingSeconds = 20
 
 [Sharing]
 ShareQuestRewards = true
 ShareSilver = true
 ShareLoot = true
 ```
+
+`PingKey = Mouse2` is the middle mouse button. Other examples: `G`, `T`, `Mouse3`.
 
 Everyone in the group should use the same settings.
 

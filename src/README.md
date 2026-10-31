@@ -13,6 +13,7 @@ src/
   Expedition.Plugin/         the BepInEx mod that runs inside Outward
     Plugin.cs                the entry point: loads settings and turns on patches
     Settings.cs              on/off switches, saved in BepInEx\config
+    Pings.cs                 middle-click to ping a spot that every player sees
     Patches/
       PhotonRoomPatches.cs   raises the online player limit from 2 to 4
       CompassPatches.cs      shows every other player on the compass, not just the first
@@ -254,3 +255,39 @@ Rules that stop duplicates:
 - Whether "Take all" goes through `TakeItem(Item, bool)` for every item. If it doesn't,
   single takes are copied but "Take all" isn't.
 - A player's dropped backpack lying on the ground may count as world loot.
+
+---
+
+## Pings.cs: ping a spot for the party
+
+This one isn't a Harmony patch. It's our own Unity component, created in `Awake()` with
+`Pings.Create()`.
+
+### Step by step
+
+| Step | Where | What happens |
+|---|---|---|
+| 1. Press the key | `Update()` | Every frame it checks `Input.GetKeyDown(PingKey)`. A 0.5 s cooldown stops spam. |
+| 2. Find the spot | `FindSpot()` | A ray goes from the middle of your screen up to 200 m. The first thing it hits that isn't your own character is the spot. If it hits nothing (the sky), the ping goes 10 m in front of you. |
+| 3. Tell everyone | `photonView.RPC(nameof(ReceivePing), PhotonTargets.All, name, spot)` | Photon calls `ReceivePing` on **every** player's PC, yours included. Offline, it just shows the ping locally. |
+| 4. Remember it | `ReceivePing()` → `Show()` | Saved in a dictionary keyed by the sender's Photon player ID, so each player has at most one ping. Other players also get a "*Name* pinged a spot" notification. |
+| 5. Draw it | `OnGUI()` | Every frame, each ping's 3D position becomes a screen position with `WorldToScreenPoint`. If it's in front of the camera, the label `Name · 24 m ▼` is drawn there, with a black shadow so it's readable anywhere. Expired pings are removed. |
+
+### How the networking works
+
+Photon can only send an RPC through a `PhotonView`, an ID that every player's game agrees on.
+Normally the game hands these out. We make our own object with a **fixed** ID, `981`, so it
+exists with the same ID on every PC without anyone sending it. Raid Mode does the same with
+`980`. The method that receives the message must have the `[PunRPC]` attribute.
+
+### Settings
+
+`Pings` (on/off), `PingKey` (a Unity `KeyCode`, default `Mouse2` = middle mouse) and
+`PingSeconds` (default 20) live in the `[Party]` section of the config file.
+
+### Not checked yet
+
+- Whether Outward already uses the middle mouse button for something. If it does, change
+  `PingKey`.
+- The ping only shows while the spot is in front of your camera. There's no arrow at the
+  screen edge for pings behind you yet.
