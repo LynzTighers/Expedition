@@ -27,7 +27,7 @@ Open the link, scroll to **Assets**, and download `Expedition-x.y.z.zip`
 | Dropped items show up for everyone | ✅ Works |
 | Going down and being revived | ✅ Works |
 | No errors in the log | ✅ Works |
-| Compass markers | ⚠️ Bug: the last player to join sees everyone, but the first two players don't see the third on their compass |
+| Compass markers | ⚠️ Bug in 0.1.0: the first two players didn't see the third on their compass. Fixed in 0.1.1, not yet re-tested |
 | Quest progress for every player | ❔ Not tested yet |
 
 Normal single-player and 2-player co-op play as usual.
@@ -86,7 +86,7 @@ BepInEx mods only work on this version.
 Open `Outward_Defed\BepInEx\LogOutput.log` with Notepad. You should see:
 
 ```
-[Info   :   BepInEx] Loading [Expedition 0.1.0]
+[Info   :   BepInEx] Loading [Expedition 0.1.1]
 [Info   :Expedition] THis mod has loaded!
 [Info   :Expedition] Room limit raised to 4 players.
 ```

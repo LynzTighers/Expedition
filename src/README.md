@@ -14,6 +14,7 @@ src/
     Plugin.cs                the entry point: loads the mod and turns on patches
     Patches/
       PhotonRoomPatches.cs   raises the online player limit from 2 to 4
+      CompassPatches.cs      shows every other player on the compass, not just the first
 ```
 
 Why two projects? Code in `Expedition.Core` can be tested in a second with
@@ -109,7 +110,7 @@ assumes 2 players, so expect problems. These are the next tasks, in order:
    and that check can get stuck with extra players.
 2. **Messages that only reach one player.** Some of the game's sync messages (items, stash,
    quests) are sent only to the host. With 2 players that's everyone else; with 4 it isn't.
-3. **UI built for 2.** Compass markers, rest menu markers and respawn points.
+3. **UI built for 2.** Rest menu markers and respawn points. (Compass markers: fixed, see below.)
 4. **Balance.** Enemy scaling, revives, rewards.
 
 ### Testing it
@@ -121,3 +122,44 @@ assumes 2 players, so expect problems. These are the next tasks, in order:
 - Check `BepInEx\LogOutput.log` for `Room limit raised to 4 players.` If Harmony can't find
   a method, it logs an error naming the patch.
 - Split-screen is a separate system, and this patch doesn't change it.
+
+---
+
+## Patches/CompassPatches.cs: every player on the compass
+
+### The bug (found in a 3-player test)
+
+The last player to join saw everyone on their compass, but the first two players
+didn't see the third.
+
+### Why (read from the game's code with REA)
+
+`OtherPlayersCompass.Update` keeps an array called `m_watchedElements`: the players
+your compass shows. Every frame it does this:
+
+```
+slot = 0
+for each player in the lobby (except you):
+    if (watched[slot] == null) {   // only if this slot is empty...
+        watched[slot] = player;
+        slot++;                    // ...does it move to the next slot
+    }
+```
+
+The slot only moves forward when it was **empty**. Walk through it as player 1:
+
+| When | What happens |
+|---|---|
+| Player 2 joins | Slot 0 is empty, so player 2 goes in slot 0. |
+| Player 3 joins | The array grows to 2 slots. Player 2: slot 0 is full, so skip, and `slot` stays 0. Player 3: slot 0 is *still* full, so skip again. Player 3 is never added. |
+
+Player 3 joined last, so their array started empty and filled with everyone. That
+matches exactly what we saw.
+
+### The fix
+
+A **Prefix** empties the array just before the game's `Update` runs. The game's own
+loop then refills it from scratch every frame, so every player gets a slot in order.
+It's a few `null` writes per frame, so it costs nothing noticeable.
+
+Raid Mode fixes this the same way, which is a good sign the approach is safe.

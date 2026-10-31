@@ -5,7 +5,7 @@ using HarmonyLib;
 namespace Expedition.Plugin
 {
 
-    [BepInPlugin("com.lynztighers.expedition", "Expedition", "0.1.0")]
+    [BepInPlugin("com.lynztighers.expedition", "Expedition", "0.1.1")]
     public class Plugin : BaseUnityPlugin
 
     {
