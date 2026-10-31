@@ -13,7 +13,13 @@ A co-op expansion for **Outward Definitive Edition** (BepInEx 5, C#): bigger par
 | Feature | Status |
 |---|---|
 | Online rooms hold **4 players** instead of 2 | ✅ Works: tested with 3 players. Not yet tested with 4. |
+| **Nameplates:** other players' names on their health bar, visible at any distance | 🆕 0.2.0, not yet tested in-game |
+| **Shared quest rewards:** every player gets the quest's items, skills, silver and XP | 🆕 0.2.0, not yet tested in-game |
+| **Shared silver:** silver looted from chests, enemies or the ground is split evenly | 🆕 0.2.0, not yet tested in-game |
+| **Shared loot:** take an item from a chest or enemy and everyone else gets their own copy | 🆕 0.2.0, not yet tested in-game |
 | Waymarks (pings) | In development |
+
+Each feature can be turned off: see [Settings](#settings).
 
 ### 3-player test results
 
@@ -123,9 +129,10 @@ same things.
 3. Press **Ctrl+F** and search for `Expedition`. You should find:
 
 ```
-[Info   :   BepInEx] Loading [Expedition 0.1.1]
+[Info   :   BepInEx] Loading [Expedition 0.2.0]
 [Info   :Expedition] THis mod has loaded!
 [Info   :Expedition] Room limit raised to 4 players.
+[Info   :Expedition] Nameplates: True, shared quest rewards: True, shared silver: True, shared loot: True
 ```
 
 🎉 That's it. The version number should match the ZIP you downloaded.
@@ -148,6 +155,32 @@ same things.
 
 The game's menus still show 2 players. That's expected: the limit is raised behind the
 scenes, and the menus haven't been updated yet.
+
+### How sharing works
+
+| What | How it's shared | Notes |
+|---|---|---|
+| **Quest rewards** | Everyone gets the full reward | Decided by the **host's** settings |
+| **Silver** | Split evenly; the looter keeps any leftover (10 silver, 3 players → 4 / 3 / 3) | From chests, enemy bodies and the ground. Never from a player's own pouch, bag or stash |
+| **Items** | Everyone else gets their own copy, with a "received" message | Only from chests and enemy bodies, not items lying on the ground (so dropped gear can't be duplicated). Silver and gold aren't copied, they're split |
+
+## Settings
+
+Start the game once with Expedition installed. BepInEx then creates
+`Outward_Defed\BepInEx\config\com.lynztighers.expedition.cfg`. Open it with Notepad and
+change `true` to `false` for anything you want off, then restart the game:
+
+```ini
+[Party]
+Nameplates = true
+
+[Sharing]
+ShareQuestRewards = true
+ShareSilver = true
+ShareLoot = true
+```
+
+Everyone in the group should use the same settings.
 
 ## Update to a new version
 

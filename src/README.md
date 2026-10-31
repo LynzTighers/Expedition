@@ -11,10 +11,14 @@ src/
       PingUpdate.cs          one "player N pinged here" message
       PingBoard.cs           keeps the newest ping per player (in progress)
   Expedition.Plugin/         the BepInEx mod that runs inside Outward
-    Plugin.cs                the entry point: loads the mod and turns on patches
+    Plugin.cs                the entry point: loads settings and turns on patches
+    Settings.cs              on/off switches, saved in BepInEx\config
     Patches/
       PhotonRoomPatches.cs   raises the online player limit from 2 to 4
       CompassPatches.cs      shows every other player on the compass, not just the first
+      NameplatePatches.cs    other players' names on their health bars, at any distance
+      QuestRewardPatches.cs  quest rewards go to every player
+      LootSharingPatches.cs  silver is split, chest and enemy items are copied to everyone
 ```
 
 Why two projects? Code in `Expedition.Core` can be tested in a second with
@@ -163,3 +167,90 @@ loop then refills it from scratch every frame, so every player gets a slot in or
 It's a few `null` writes per frame, so it costs nothing noticeable.
 
 Raid Mode fixes this the same way, which is a good sign the approach is safe.
+
+---
+
+## Settings.cs: on/off switches
+
+BepInEx gives every plugin a `Config` object. `config.Bind(section, key, default, description)`
+creates a setting and saves it to `BepInEx\config\com.lynztighers.expedition.cfg`, so players
+can turn features off with Notepad. `Settings.Bind(Config)` runs in `Awake()` **before**
+`PatchAll()`, so the patches can read the values.
+
+---
+
+## Patches/NameplatePatches.cs: names over other players
+
+Every character with a floating health bar has a `CharacterBarListener`. Two of its methods matter:
+
+| Method | What it does normally | What the Postfix changes (other players only) |
+|---|---|---|
+| `UpdateDisplay` | Fills in the bars. A full health bar hides itself. | `HideIfFull = false`, and the bar's text label (`m_lblValue`) shows the player's name |
+| `UpdateVisibility` | Hides the bar if the character is too far (`m_inRange`) or behind something (`m_inSight`) | Forces both to `true` and a huge `DisplayDistance`, then calls `UpdateSeenByCamera()` so the bar still only shows when the player is on your screen |
+
+"Other player" means the bar's character has an `OwnerPlayerSys` (it belongs to a real
+player) and isn't you.
+
+---
+
+## Patches/QuestRewardPatches.cs: rewards for everyone
+
+Quests hand out rewards with a NodeCanvas task called `GiveReward`. REA showed it has a
+`RewardReceiver` setting with three values: `Host`, `Instigator` (whoever triggered the
+quest step) and `Everyone`. With `Everyone`, the game's own code already gives each player
+their reward over the network.
+
+So the patch is tiny:
+
+- **Prefix:** remember the original setting in `__state`, then switch it to `Everyone`.
+- **Postfix:** put the original setting back.
+
+`__state` is a Harmony feature: whatever the Prefix stores there is handed to the Postfix.
+The Prefix does nothing on a guest's PC (`PhotonNetwork.isNonMasterClientInRoom`), because
+quests run on the host, and a second copy would give rewards twice.
+
+---
+
+## Patches/LootSharingPatches.cs: shared silver and loot
+
+### What the game does (read with REA)
+
+| Method | When | Calls |
+|---|---|---|
+| `CharacterInventory.TakeItem(Item, bool)` | Taking one item or a silver pile | `AddMoney` for silver (on the host) |
+| `CharacterInventory.TakeAllContent(ItemContainer, bool)` | "Take all" on a chest or body | `TakeItem` for the items, `AddMoney` for the silver |
+| `CharacterInventory.AddMoney(int, int, bool)` | Any time silver is added | On a guest, sends the request to the host |
+| `CharacterInventory.ReceiveItemReward(id, qty, bool)` | Quest item rewards | Sends the item to that player's PC if it isn't yours |
+
+### Shared silver
+
+1. `TakeItem` and `TakeAllContent` get a **Prefix** that adds 1 to `Loot.ActiveTakes` when
+   the source is world loot, and a **Finalizer** that subtracts it again. A Finalizer runs
+   even if the game's method crashes, so the counter can't get stuck.
+2. `AddMoney` gets a **Prefix**. If a loot take is running, it gives every other player
+   `amount / players`, then lowers the looter's amount with `ref int __0` (the first
+   parameter, by position).
+3. `Loot.GivingShares` stops those extra `AddMoney` calls from being split again.
+
+Silver is only split when it comes from the world. `IsWorldLoot` refuses containers owned
+by a player (`OwnerCharacter` that isn't AI) and every player's stash. Otherwise taking
+silver out of your own stash would hand it to your teammates.
+
+### Shared loot
+
+Inside the `TakeItem` Prefix, if the item comes from a chest or body, every other player
+gets `ReceiveItemReward(item.ItemID, quantity, false)`. That's the same network-safe path
+quest rewards use, and it shows them a "received" message.
+
+Rules that stop duplicates:
+
+- Copies are made only on the **looter's own PC** (`IsLocalPlayer`), so each take is copied once.
+- Only items **inside a container**. A loose item on the ground might have been dropped by a
+  player, and copying it would duplicate their gear.
+- Silver and gold are never copied. They're split instead.
+
+### Not checked yet
+
+- Whether "Take all" goes through `TakeItem(Item, bool)` for every item. If it doesn't,
+  single takes are copied but "Take all" isn't.
+- A player's dropped backpack lying on the ground may count as world loot.
