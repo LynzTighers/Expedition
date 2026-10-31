@@ -3,10 +3,7 @@
 A co-op expansion for **Outward Definitive Edition** (BepInEx 5, C#): bigger parties
 (4 players to start), better co-op sync, and waymarks (pings) your party can see.
 
-### ⬇️ [Download the latest version](https://github.com/LynzTighers/Expedition/releases/latest)
-
-Open the link, scroll to **Assets**, and download `Expedition-x.y.z.zip`
-(not "Source code"). Then follow [Install](#install) below.
+### ⬇️ [Download the latest version](https://github.com/LynzTighers/Expedition/releases/latest) · 📖 [How to install](#install)
 
 > **Status: alpha. Tested with 3 players; not yet with 4.** Expect some bugs when more than
 > 2 people play together. Please report what happens (see [Reporting problems](#reporting-problems)).
@@ -36,54 +33,94 @@ Normal single-player and 2-player co-op play as usual.
 
 ## Install
 
-Everyone in the group should install it, including the host.
+**Everyone in the group installs it, including the host.** It takes about 10 minutes.
+You'll download two ZIP files:
 
-### 1. Switch Outward to the Mono version
+| Download | What it is | Where |
+|---|---|---|
+| **BepInExPack_Outward** | The mod loader. Lets Outward run mods. | [Thunderstore](https://thunderstore.io/c/outward/p/BepInEx/BepInExPack_Outward/): click **Download** on the right |
+| **Expedition-x.y.z.zip** | This mod | [Latest release](https://github.com/LynzTighers/Expedition/releases/latest): see step 3 |
 
-BepInEx mods only work on this version.
+> Already have BepInEx working for Outward (for example from another mod)? Skip to [step 3](#step-3-install-expedition).
 
-1. In Steam, right-click **Outward** → **Properties** → **Betas**.
-2. Choose **default-mono**.
-3. Let Steam finish updating.
+### Step 1: Switch Outward to the Mono version
 
-### 2. Install BepInEx
+BepInEx only works on this version of the game.
+
+1. Open **Steam** → **Library**.
+2. Right-click **Outward** → **Properties…**
+3. Click **Betas** on the left.
+4. In the **Beta Participation** drop-down, choose **default-mono**.
+5. Close the window and wait for Steam to finish the update before you go on.
+
+### Step 2: Install BepInEx
+
+**2a. Download and unzip it**
 
 1. Download **BepInExPack_Outward** from
    [Thunderstore](https://thunderstore.io/c/outward/p/BepInEx/BepInExPack_Outward/)
-   (click **Download** on the right).
-2. Unzip it **somewhere else first**, such as your Downloads folder. Not into the game folder.
-3. Find your game folder: in Steam, right-click **Outward** → **Manage** → **Browse local files**.
-   Open the **`Outward_Defed`** folder. It contains `Outward Definitive Edition.exe`.
-4. Open the unzipped **`BepInExPack_Outward`** folder and move **what's inside it** into
-   `Outward_Defed`: the `BepInEx` folder, `winhttp.dll` and `doorstop_config.ini`.
-   Don't move the `BepInExPack_Outward` folder itself.
+   (the **Download** button on the right).
+2. In your **Downloads** folder, right-click the ZIP → **Extract All…** → **Extract**.
+   This makes a normal folder. **Don't** extract it into the game folder.
+3. Open the new folder, then open the **`BepInExPack_Outward`** folder inside it.
+   You'll see 3 things: the `BepInEx` folder, `winhttp.dll` and `doorstop_config.ini`.
+   Leave this window open.
 
-   When you're done it should look like this:
+**2b. Open the game folder**
 
-   ```
-   Outward_Defed\
-     Outward Definitive Edition.exe
-     winhttp.dll
-     doorstop_config.ini
-     BepInEx\
-   ```
+1. In Steam, right-click **Outward** → **Manage** → **Browse local files**.
+   A folder called `Outward` opens.
+2. Double-click the **`Outward_Defed`** folder. This is the Definitive Edition.
+   You're in the right place if you see **`Outward Definitive Edition.exe`**.
 
-   ⚠️ Use `Outward_Defed`, not the outer `Outward` folder with the classic `Outward.exe`.
-   If BepInEx is there, it won't load in the Definitive Edition.
-5. Start the game once, then close it. This creates `Outward_Defed\BepInEx\plugins`.
+   ⚠️ Don't use the outer `Outward` folder (the one with the classic `Outward.exe`).
+   BepInEx won't load from there.
 
-### 3. Install Expedition
+**2c. Move the 3 files in**
 
-1. Download the latest `Expedition-x.y.z.zip` from the
-   [latest release](https://github.com/LynzTighers/Expedition/releases/latest), under **Assets**.
-2. Copy **both** DLLs into `Outward_Defed\BepInEx\plugins\`:
-   - `Expedition.Plugin.dll`
-   - `Expedition.Core.dll`
-3. Remove other co-op mods such as **Raid Mode**. They change the same things.
+1. Go back to the `BepInExPack_Outward` window, press **Ctrl+A** to select all 3 items,
+   then **Ctrl+C** to copy them.
+2. Click into the `Outward_Defed` window and press **Ctrl+V** to paste.
 
-### 4. Check that it loaded
+When you're done, `Outward_Defed` should look like the left side, not the right:
 
-Open `Outward_Defed\BepInEx\LogOutput.log` with Notepad. You should see:
+![Outward_Defed folder: correct (BepInEx, winhttp.dll and doorstop_config.ini next to the exe) and wrong (inside a BepInExPack_Outward folder)](images/bepinex-folder.svg)
+
+**2d. Let BepInEx set itself up**
+
+Start Outward once, wait for the main menu, then quit. This creates the
+`Outward_Defed\BepInEx\plugins` folder you need in step 3.
+
+### Step 3: Install Expedition
+
+**3a. Download the mod**
+
+1. Open the [latest release](https://github.com/LynzTighers/Expedition/releases/latest).
+2. Scroll down to **Assets** and click **`Expedition-x.y.z.zip`**.
+   Don't download "Source code": that's the code, not the mod.
+
+![Release page: download Expedition-x.y.z.zip under Assets, skip the Source code files](images/release-assets.svg)
+
+If your browser warns about the download, choose **Keep**. Small mod files often get this
+warning.
+
+**3b. Copy the 2 DLLs into the plugins folder**
+
+1. Open the ZIP (double-click it). Inside are **`Expedition.Core.dll`** and
+   **`Expedition.Plugin.dll`**. Select both and press **Ctrl+C**.
+2. In the game folder, open **`Outward_Defed`** → **`BepInEx`** → **`plugins`**.
+3. Press **Ctrl+V** to paste. If Windows asks to replace older files, choose **Replace**.
+
+![Copy Expedition.Core.dll and Expedition.Plugin.dll from the ZIP into Outward_Defed\BepInEx\plugins](images/plugins-folder.svg)
+
+Using another co-op mod such as **Raid Mode**? Remove it from `plugins`. They change the
+same things.
+
+### Step 4: Check that it worked
+
+1. Start Outward and wait for the main menu.
+2. Open `Outward_Defed\BepInEx\LogOutput.log` (double-click it; it opens in Notepad).
+3. Press **Ctrl+F** and search for `Expedition`. You should find:
 
 ```
 [Info   :   BepInEx] Loading [Expedition 0.1.1]
@@ -91,16 +128,30 @@ Open `Outward_Defed\BepInEx\LogOutput.log` with Notepad. You should see:
 [Info   :Expedition] Room limit raised to 4 players.
 ```
 
-If there's no `LogOutput.log` at all, BepInEx isn't loading: re-check step 2.
+🎉 That's it. The version number should match the ZIP you downloaded.
+
+### Something's not right?
+
+| What you see | Fix |
+|---|---|
+| No `LogOutput.log` file at all | BepInEx isn't loading. Check step 1 (default-mono) and step 2c (files next to `Outward Definitive Edition.exe`, not inside another folder). |
+| No `plugins` folder inside `BepInEx` | Start the game once (step 2d), or create a folder named `plugins` yourself. |
+| Log has no `Expedition` lines | The DLLs aren't in `BepInEx\plugins`, or they're inside an extra folder there. |
+| Log shows an old version number | You still have old DLLs. Delete both Expedition DLLs from `plugins` and copy the new ones in. |
+| Mod still doesn't load | Right-click each DLL → **Properties**. If there's an **Unblock** box at the bottom, tick it and click **OK**. |
 
 ## Play together
 
 1. The host loads their character and hosts an online game as usual.
 2. Everyone else joins it as usual.
-3. Everyone should use the **same Expedition version**.
+3. Everyone should use the **same Expedition version** (check step 4).
 
 The game's menus still show 2 players. That's expected: the limit is raised behind the
 scenes, and the menus haven't been updated yet.
+
+## Update to a new version
+
+Download the new ZIP (step 3a) and copy both DLLs into `plugins` again, choosing **Replace**.
 
 ## Uninstall
 
