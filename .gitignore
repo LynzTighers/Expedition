@@ -12,3 +12,6 @@ obj/
 
 # Game DLLs must never be committed (they belong to the game's publisher)
 Assembly-CSharp*.dll
+
+# graphify knowledge graph output (local only)
+graphify-out/
