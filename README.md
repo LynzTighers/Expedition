@@ -17,7 +17,8 @@ A co-op expansion for **Outward Definitive Edition** (BepInEx 5, C#): bigger par
 | **Shared quest rewards:** every player gets the quest's items, skills, silver and XP | 🆕 0.2.0, not yet tested in-game |
 | **Shared silver:** silver looted from chests, enemies or the ground is split evenly | 🆕 0.2.0, not yet tested in-game |
 | **Shared loot:** take an item from a chest or enemy and everyone else gets their own copy | 🆕 0.2.0, not yet tested in-game |
-| **Pings:** press the **middle mouse button** to mark the spot in front of you. Everyone sees `Name · 24 m ▼` there for 20 seconds | 🆕 0.2.0, not yet tested in-game |
+| **Pings:** press **G** to mark the spot in front of you. Everyone sees a marker in your party colour with your name and distance, on screen and on the big map | 🆕 0.3.0 redesign, not yet tested in-game |
+| **Party on the map:** every player shows on the big map with their name, in their party colour | 🆕 0.3.0, not yet tested in-game |
 
 Each feature can be turned off: see [Settings](#settings).
 
@@ -129,10 +130,10 @@ same things.
 3. Press **Ctrl+F** and search for `Expedition`. You should find:
 
 ```
-[Info   :   BepInEx] Loading [Expedition 0.2.0]
+[Info   :   BepInEx] Loading [Expedition 0.3.0]
 [Info   :Expedition] THis mod has loaded!
 [Info   :Expedition] Room limit raised to 4 players.
-[Info   :Expedition] Pings: True (key: Mouse2)
+[Info   :Expedition] Pings: True (key: G), map markers: True
 [Info   :Expedition] Nameplates: True, shared quest rewards: True, shared silver: True, shared loot: True
 ```
 
@@ -157,12 +158,41 @@ same things.
 The game's menus still show 2 players. That's expected: the limit is raised behind the
 scenes, and the menus haven't been updated yet.
 
+### Party colours
+
+Every player has a colour, used for their pings and their marker on the map. Everyone sees
+the same colour for the same player:
+
+| Player | Colour |
+|---|---|
+| Host | Gold |
+| 2nd to join | Teal |
+| 3rd to join | Rust |
+| 4th to join | Lavender |
+
 ### Pinging
 
-Aim at something and click the **middle mouse button** (the scroll wheel). Everyone in the
-group sees a yellow marker with your name and how far away it is, and gets a
-"*Name* pinged a spot" message. A new ping replaces your old one. Pings disappear after
-20 seconds. You can change the key and the time in [Settings](#settings).
+Aim at something and press **G**. Everyone in the group sees a diamond marker in your party
+colour above that spot, with your name and how far away it is, and gets a
+"*Name* pinged a spot" message. The ping also appears on the big map.
+
+- It "pops" when it appears and fades out at the end (after 20 seconds).
+- If the spot is behind you or off screen, the marker sticks to the edge of the screen so
+  you know which way to look.
+- A new ping replaces your old one.
+- The name uses Outward's own UI font.
+
+You can change the key and the time in [Settings](#settings).
+
+![Pings in party colours, with name and distance; an off-screen ping pinned to the screen edge](images/ping-preview.svg)
+
+*Drawing of the design, not a screenshot.*
+
+### Party on the big map
+
+Open the map and every player is on it: a circle in their party colour with their name. It
+uses the game's own map markers. Turn it off with `MapMarkers = false`, or hide only
+yourself with `ShowSelfOnMap = false`.
 
 ### How sharing works
 
@@ -182,8 +212,10 @@ change `true` to `false` for anything you want off, then restart the game:
 [Party]
 Nameplates = true
 Pings = true
-PingKey = Mouse2
+PingKey = G
 PingSeconds = 20
+MapMarkers = true
+ShowSelfOnMap = true
 
 [Sharing]
 ShareQuestRewards = true
@@ -191,7 +223,9 @@ ShareSilver = true
 ShareLoot = true
 ```
 
-`PingKey = Mouse2` is the middle mouse button. Other examples: `G`, `T`, `Mouse3`.
+`PingKey` examples: `G`, `T`, `Mouse2` (middle mouse), `Mouse3` (side mouse button).
+Updating from 0.2.0? If your ping key was still the old default (middle mouse), it switches
+to `G` automatically.
 
 Everyone in the group should use the same settings.
 

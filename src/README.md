@@ -13,7 +13,9 @@ src/
   Expedition.Plugin/         the BepInEx mod that runs inside Outward
     Plugin.cs                the entry point: loads settings and turns on patches
     Settings.cs              on/off switches, saved in BepInEx\config
-    Pings.cs                 middle-click to ping a spot that every player sees
+    Pings.cs                 press G to ping a spot that every player sees
+    PartyColors.cs           one colour per player, for pings and the map
+    PartyMap.cs              puts every player on the big map
     Patches/
       PhotonRoomPatches.cs   raises the online player limit from 2 to 4
       CompassPatches.cs      shows every other player on the compass, not just the first
@@ -178,6 +180,17 @@ creates a setting and saves it to `BepInEx\config\com.lynztighers.expedition.cfg
 can turn features off with Notepad. `Settings.Bind(Config)` runs in `Awake()` **before**
 `PatchAll()`, so the patches can read the values.
 
+### Changing a default (config migration)
+
+BepInEx writes every setting to the file the first time, and after that it **keeps the value
+in the file**. So changing `PingKey`'s default from `Mouse2` to `G` in the code only reaches
+new players. Anyone who ran 0.2.0 still has `PingKey = Mouse2` saved.
+
+To fix that, there's a hidden `ConfigVersion` setting in an `[Internal]` section.
+`Migrate()` runs once: if `ConfigVersion` is below 2 and `PingKey` is still the old default
+`Mouse2`, it changes it to `G`, then sets `ConfigVersion = 2` so it never runs again. A
+player who deliberately picked another key keeps it.
+
 ---
 
 ## Patches/NameplatePatches.cs: names over other players
@@ -270,8 +283,24 @@ This one isn't a Harmony patch. It's our own Unity component, created in `Awake(
 | 1. Press the key | `Update()` | Every frame it checks `Input.GetKeyDown(PingKey)`. A 0.5 s cooldown stops spam. |
 | 2. Find the spot | `FindSpot()` | A ray goes from the middle of your screen up to 200 m. The first thing it hits that isn't your own character is the spot. If it hits nothing (the sky), the ping goes 10 m in front of you. |
 | 3. Tell everyone | `photonView.RPC(nameof(ReceivePing), PhotonTargets.All, name, spot)` | Photon calls `ReceivePing` on **every** player's PC, yours included. Offline, it just shows the ping locally. |
-| 4. Remember it | `ReceivePing()` → `Show()` | Saved in a dictionary keyed by the sender's Photon player ID, so each player has at most one ping. Other players also get a "*Name* pinged a spot" notification. |
-| 5. Draw it | `OnGUI()` | Every frame, each ping's 3D position becomes a screen position with `WorldToScreenPoint`. If it's in front of the camera, the label `Name · 24 m ▼` is drawn there, with a black shadow so it's readable anywhere. Expired pings are removed. |
+| 4. Remember it | `ReceivePing()` → `Show()` | Saved in a dictionary keyed by the sender's Photon player ID, so each player has at most one ping. The colour comes from that ID (`PartyColors.ForActor`). Other players also get a "*Name* pinged a spot" notification. |
+| 5. Put it on the map | `Show()` | An empty object at the spot gets a game map marker (`PartyMap.AttachMarker`), labelled "*Name*'s ping". It's destroyed when the ping expires. |
+| 6. Draw it | `OnGUI()` → `DrawPing()` | Every frame, each ping's 3D position becomes a screen position with `WorldToScreenPoint`, and the marker is drawn there (details below). Expired pings are removed. |
+
+### How the marker is drawn
+
+Everything is drawn with Unity's `GUI` calls, in this order:
+
+1. **Stem:** a thin line in the party colour from the spot up to the diamond, with a dark line behind it.
+2. **Diamond:** a dark diamond, then a slightly smaller one in the party colour on top, which gives it an outline. The diamond is one white texture made in code (`MakeDiamond`), tinted with `GUI.color`.
+3. **Name and distance:** the name in parchment, with the distance underneath in a dimmer shade, each with a black shadow.
+
+Effects:
+
+- **Pop:** for the first 0.35 s the diamond starts 80% bigger and shrinks to normal size.
+- **Fade:** in the last 2 seconds everything fades out (`alpha`).
+- **Screen edge:** if the spot is behind you (`screen.z < 0`) or off screen, the marker is clamped to the screen edge (48 px margin) so it shows which way to look.
+- **Game font:** the first time it draws, it borrows the font from a `Text` in your own HUD (`CharacterUI`), so the labels match Outward's UI.
 
 ### How the networking works
 
@@ -282,12 +311,58 @@ exists with the same ID on every PC without anyone sending it. Raid Mode does th
 
 ### Settings
 
-`Pings` (on/off), `PingKey` (a Unity `KeyCode`, default `Mouse2` = middle mouse) and
-`PingSeconds` (default 20) live in the `[Party]` section of the config file.
+`Pings` (on/off), `PingKey` (a Unity `KeyCode`, default `G`) and `PingSeconds` (default 20)
+live in the `[Party]` section of the config file.
 
 ### Not checked yet
 
-- Whether Outward already uses the middle mouse button for something. If it does, change
-  `PingKey`.
-- The ping only shows while the spot is in front of your camera. There's no arrow at the
-  screen edge for pings behind you yet.
+- Whether Outward already uses G for something. If it does, change `PingKey`.
+- Whether the game's font can be used by `GUI` (it should, Unity UI fonts are dynamic). If
+  not, labels fall back to Unity's default font.
+
+---
+
+## PartyColors.cs: one colour per player
+
+Four warm, muted colours that suit Outward's parchment-and-gold UI: gold `#E3B25C`, teal
+`#66B8AD`, rust `#D97059` and lavender `#9E87D6`.
+
+The colour is picked from the player's **Photon actor number**: 1 for the host, then 2, 3, 4
+in the order people joined. Every PC agrees on that number, so everyone sees the same
+colour for the same player. For pings it's the sender's ID; for characters it's
+`character.photonView.ownerId`, the actor who owns that character.
+
+---
+
+## PartyMap.cs and Patches/MapMarkerPatches.cs: the party on the big map
+
+### What the game does (read with REA)
+
+| Class | What it does |
+|---|---|
+| `MapWorldMarker` | A component you put on a world object. Public fields: `Text` (the label), `ShowCircle`, `ShowBackground`, `AlignLeft`, `Anchored`. Its `OnEnable()` calls `MapDisplay.RegisterMapMarker(this)`, and `OnDisable()` unregisters it. |
+| `MapDisplay.RegisterMapMarker` | **Static**, adding the marker to a static list. So a marker can register before the map has ever been opened. |
+| `MapDisplay.UpdateWorldMarkers` | When the map is open, works out each registered marker's map position from its world position and calls `MapWorldMarkerDisplay.UpdateMarkerDisplay(marker)`. |
+| `MapWorldMarkerDisplay` | The on-map visual: a `Text` label, a `Circle` image and a `Background` image. `UpdateMarkerDisplay` sets the text, position and colours. |
+
+So the game already has everything needed to show a labelled point on the map. We just
+attach a `MapWorldMarker` to each player.
+
+### What our code does
+
+- **`PartyMap`:** a component that checks once a second, for every player character, that
+  it has a child object called `ExpeditionMapMarker`. That child carries a `MapWorldMarker`
+  (text = the player's name, circle on) and a `PartyMapTag` holding the player's colour.
+  The child is created **inactive**, filled in, then switched on, so the map never registers
+  a half-made marker. Your own marker is hidden if `ShowSelfOnMap` is off.
+- **`MapMarkerColorPatch`:** a Postfix on `MapWorldMarkerDisplay.UpdateMarkerDisplay`. If the
+  marker has a `PartyMapTag`, it recolours the circle with the party colour and the label
+  with a darker shade, so it stays readable on the light map.
+- **Pings** use the same `PartyMap.AttachMarker` helper, on an empty object at the ping spot.
+
+### Not checked yet
+
+- How many markers the map can show at once. `MapDisplay` keeps a fixed array of marker
+  displays (`m_markerTexts`); if it's small, some markers might not appear.
+- Whether markers show on every map. The game only draws markers that fall inside the map
+  of the area you're in.

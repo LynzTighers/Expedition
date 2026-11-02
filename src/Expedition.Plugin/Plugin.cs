@@ -5,7 +5,7 @@ using HarmonyLib;
 namespace Expedition.Plugin
 {
 
-    [BepInPlugin("com.lynztighers.expedition", "Expedition", "0.2.0")]
+    [BepInPlugin("com.lynztighers.expedition", "Expedition", "0.3.0")]
     public class Plugin : BaseUnityPlugin
 
     {
@@ -21,7 +21,9 @@ namespace Expedition.Plugin
             Logger.LogInfo("Room limit raised to " + Patches.RoomLimit.MaxPlayers + " players.");
 
             Pings.Create();
-            Logger.LogInfo("Pings: " + Settings.Pings.Value + " (key: " + Settings.PingKey.Value + ")");
+            PartyMap.Create();
+            Logger.LogInfo("Pings: " + Settings.Pings.Value + " (key: " + Settings.PingKey.Value + ")"
+                + ", map markers: " + Settings.MapMarkers.Value);
             Logger.LogInfo("Nameplates: " + Settings.Nameplates.Value
                 + ", shared quest rewards: " + Settings.ShareQuestRewards.Value
                 + ", shared silver: " + Settings.ShareSilver.Value
